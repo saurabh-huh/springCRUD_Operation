@@ -7,8 +7,10 @@ import demo.spring.springboot.modelDao.Customer;
 import demo.spring.springboot.repository.CustomerRepository;
 import demo.spring.springboot.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Pageable;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,14 +20,18 @@ public class CustomerServiceImp implements CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
-    public Customer createCustomer(Customer customer) {
+    public CustomerDto createCustomer(Customer customer) {
         customerRepository.save(customer);
-        return customer;
+        return CustomerToDto.toDto(customer);
     }
 
-    public List<CustomerDto> fetchCustomerList() {
-        List<Customer> customerList = customerRepository.findAll();
-        return CustomerToDto.toDto(customerList);
+    public List<CustomerDto> fetchCustomerList(Pageable pageable) {
+//        List<Customer> customerList = customerRepository.findAll();
+            Page<Customer> customerPage = customerRepository.findAll((org.springframework.data.domain.Pageable) pageable);
+            return customerPage.stream().map(customer -> CustomerToDto.toDto(customer)).toList();
+
+
+//        return CustomerToDto.toDto(customerList);
     }
 
     public CustomerDto fetchCustomerById(UUID customerId) {

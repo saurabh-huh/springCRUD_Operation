@@ -1,16 +1,20 @@
 package demo.spring.springboot.controller;
 
 import demo.spring.springboot.Mapper.CustomerFromDto;
+import demo.spring.springboot.Mapper.CustomerToDto;
 import demo.spring.springboot.dto.CustomerDto;
 import demo.spring.springboot.modelDao.Customer;
 import demo.spring.springboot.serviceImp.CustomerServiceImp;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.Pageable;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,18 +29,21 @@ private CustomerServiceImp customerServiceImp;
 
 // Save operation
 @PostMapping
-    public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer) {
+    public ResponseEntity<CustomerDto> createCustomer(@Valid @RequestBody Customer customer) {
         log.info("Customer created successfully");
         return ResponseEntity.ok(customerServiceImp.createCustomer(customer));
     }
-
-//// Read operation
-    @GetMapping
-    public ResponseEntity<List<CustomerDto>> fetchCustomerList() {
+@GetMapping
+    public ResponseEntity<List<CustomerDto>> fetchCustomerList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         log.info("List of customers fetched successfully");
-        return ResponseEntity.ok( customerServiceImp.fetchCustomerList());
-    }
 
+        Pageable pageable = (Pageable) PageRequest.of(page, size);
+        List<CustomerDto> customerPage = customerServiceImp.fetchCustomerList(pageable);
+
+        return ResponseEntity.ok(customerPage);
+    }
 // Update operation
     @PutMapping("/{id}")
     public ResponseEntity<CustomerDto> updateCustomer(@RequestBody Customer customer, @PathVariable("id") UUID customerId) {
