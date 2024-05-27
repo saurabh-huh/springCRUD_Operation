@@ -1,54 +1,57 @@
 package demo.spring.springboot.controller;
 
 
-import demo.spring.springboot.model.Order;
-import demo.spring.springboot.service.OrderService;
+import demo.spring.springboot.Mapper.CustomerToDto;
+import demo.spring.springboot.dto.OrderDto;
+import demo.spring.springboot.modelDao.Order;
+import demo.spring.springboot.serviceImp.OrderServiceImp;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/orders")
+@Slf4j
 public class OrderController {
     @Autowired
-    private OrderService orderService;
+    private OrderServiceImp orderServiceImp;
 
-    @GetMapping("/orders")
-    public List<Order> getAllOrders() {
-        return orderService.findAll();
+    @GetMapping
+    public ResponseEntity<List<OrderDto>> getAllOrders(@RequestParam(defaultValue = "null") UUID customerId) {
+        log.info("Get all orders Successfully");
+        return ResponseEntity.ok().body(orderServiceImp.getAllOrders(customerId));
     }
 
-    @GetMapping("/order/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
-        Optional<Order> order = orderService.findById(id);
-        return order.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderDto> getOrderById(@PathVariable UUID id) {
+        log.info("Get order By Id");
+        OrderDto orderDto = orderServiceImp.findById(id);
+        return ResponseEntity.ok(orderDto);
+
     }
 
-    @PostMapping("/orders")
-    public Order createOrder(@RequestBody Order order) {
-        return orderService.createOrder(order);
+    @PostMapping
+    public ResponseEntity<OrderDto> createOrder(@RequestBody Order order) {
+        log.info("Order save successfully");
+
+        return ResponseEntity.ok().body(orderServiceImp.createOrder(order));
     }
 
-    @PutMapping("/order/{id}")
-    public ResponseEntity<Order> updateOrder(@PathVariable Long id, @RequestBody Order orderDetails) {
-            return ResponseEntity.ok(orderService.updateOrder(orderDetails,id));
+    @PutMapping("/{id}")
+    public ResponseEntity<OrderDto> updateOrder(@PathVariable UUID id, @RequestBody Order orderDetails) {
+        log.info("Order updated successfully");
+        return ResponseEntity.ok(orderServiceImp.updateOrder(orderDetails,id));
     }
 
-    @DeleteMapping("/order/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        if (orderService.findById(id).isPresent()) {
-            orderService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable UUID id) {
+        log.info("Order deleted successfully");
+            orderServiceImp.deleteById(id);
             return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
     }
 
-    @GetMapping("/order/{customerId}")
-    public List<Order> getOrdersByCustomerById(@PathVariable Long customerId) {
-        return orderService.findByCustomerId(customerId);
-    }
 }

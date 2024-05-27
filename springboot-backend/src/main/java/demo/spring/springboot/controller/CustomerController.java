@@ -1,47 +1,59 @@
 package demo.spring.springboot.controller;
 
-import demo.spring.springboot.model.Customer;
-import demo.spring.springboot.service.CustomerService;
+import demo.spring.springboot.Mapper.CustomerFromDto;
+import demo.spring.springboot.dto.CustomerDto;
+import demo.spring.springboot.modelDao.Customer;
+import demo.spring.springboot.serviceImp.CustomerServiceImp;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/customers")
+@Slf4j
 public class CustomerController {
 
 @Autowired
-private CustomerService customerService;
+private CustomerServiceImp customerServiceImp;
 
 
 // Save operation
-@PostMapping("/customers")
-public Customer saveCustomer(@Valid @RequestBody Customer customer) {
-    return customerService.saveCustomer(customer);
-}
+@PostMapping
+    public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer) {
+        log.info("Customer created successfully");
+        return ResponseEntity.ok(customerServiceImp.createCustomer(customer));
+    }
 
 //// Read operation
-    @GetMapping("/customers")
-    public List<Customer> fetchCustomerList() {
-        return customerService.fetchCustomerList();
+    @GetMapping
+    public ResponseEntity<List<CustomerDto>> fetchCustomerList() {
+        log.info("List of customers fetched successfully");
+        return ResponseEntity.ok( customerServiceImp.fetchCustomerList());
     }
 
 // Update operation
-    @PutMapping("/customer/{id}")
-    public Customer updateCustomer(@RequestBody Customer customer, @PathVariable("id") Long customerId) {
-        return customerService.updateCustomer(customer, customerId);
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomerDto> updateCustomer(@RequestBody Customer customer, @PathVariable("id") UUID customerId) {
+        log.info("Customer updated successfully");
+        return ResponseEntity.ok( customerServiceImp.updateCustomer(customer, customerId));
     }
 
 // Delete operation
-    @DeleteMapping("/Customer/{id}")
-    public String deleteCustomerById(@PathVariable("id")  Long customerId) {
-        customerService.deleteCustomerById(customerId);
-        return "Deleted Successfully";
+    @DeleteMapping("/{id}")
+    public Void deleteCustomerById(@PathVariable("id") UUID customerId) {
+        customerServiceImp.deleteCustomerById(customerId);
+        log.info("Customer deleted successfully");
+        return null;
     }
-    @GetMapping("/Customer/{id}")
-    public Customer fetchCustomerById(@PathVariable("id")  Long customerId) {
-        return customerService.fetchCustomerById(customerId);
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomerDto> fetchCustomerById(@PathVariable("id")  UUID customerId) {
+        log.info("Customer fetched by id");
+        return ResponseEntity.ok( customerServiceImp.fetchCustomerById(customerId));
     }
 }

@@ -1,4 +1,4 @@
-package demo.spring.springboot.model;
+package demo.spring.springboot.modelDao;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,16 +6,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Entity
-@Table(name = "customerDetails")
+@Table(name = "customers")
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Customer {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+
     @Column(name = "first_name")
     private String firstName;
     @Column(name = "last_name")
